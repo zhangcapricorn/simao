@@ -1,4 +1,12 @@
+#!/usr/bin/env python
+#!encoding=gbk
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 import requests
+from bs4 import BeautifulSoup
+from lxml import etree
 
 url = "https://weibo.com/u/6448871601?from=myfollow_group&is_all=1"
 cookies = {
@@ -18,4 +26,14 @@ cookies = {
 }
 
 r = requests.get(url, cookies=cookies)
-print(r.text)
+soup = BeautifulSoup(r.text, 'html.parser')
+scripts = soup.find_all("script")
+
+content_text = scripts[-1].text[8:-3]
+content_html = content_text.split('"html":"')
+print(len(content_html))
+with open("1.html", "w") as f:
+    f.writelines(str(content_html[1]))
+
+s = BeautifulSoup("1.html", "html.parser")
+print(s.find_all("div", class_="WB_feed WB_feed_v3 WB_feed_v4"))
