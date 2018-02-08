@@ -9,9 +9,9 @@ import weibo
 from util import compare_time
 def do_job(d, cmp_time):
     result = []
-    # for i in weibo.user_ids:
-    #     temp = weibo.get_weibo(i, d, cmp_time)
-    #     result.extend(temp)
+    for i in weibo.user_ids:
+        temp = weibo.get_weibo(i, d, cmp_time)
+        result.extend(temp)
     result.extend(data.parser_jinse_blockchain(d, cmp_time))
     result.extend(data.parser_jinse_lives(cmp_time))
 
