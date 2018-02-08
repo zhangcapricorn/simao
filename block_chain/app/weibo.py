@@ -1,123 +1,66 @@
-import urllib.error
+# -*- coding: utf-8 -*-
+
 import urllib.request
-import re
-import rsa
-import http.cookiejar  #从前的cookielib
-import base64
 import json
-import urllib
-import urllib.parse
-import binascii
 
-# 用于模拟登陆新浪微博
 
-class launcher():
+proxy_addr="122.241.72.191:808" #设置代理IP
 
-    def __init__(self,username, password):
-        self.password = password
-        self.username = username
 
-    def get_prelogin_args(self):
+def use_proxy(url, proxy_addr):
+    """定义页面打开函数"""
+    req = urllib.request.Request(url)
+    req.add_header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.221 Safari/537.36 SE 2.X MetaSr 1.0")
+    proxy = urllib.request.ProxyHandler({'http': proxy_addr})
+    opener = urllib.request.build_opener(proxy, urllib.request.HTTPHandler)
+    urllib.request.install_opener(opener)
+    data = urllib.request.urlopen(req).read().decode('utf-8', 'ignore')
+    return data
 
-        '''
-        该函数用于模拟预登录过程,并获取服务器返回的 nonce , servertime , pub_key 等信息
-        '''
-        json_pattern = re.compile('\((.*)\)')
-        url = 'http://login.sina.com.cn/sso/prelogin.php?entry=weibo&callback=sinaSSOController.preloginCallBack&su=&' + self.get_encrypted_name() + '&rsakt=mod&checkpin=1&client=ssologin.js(v1.4.18)'
+
+def get_container_id(url):
+    """获取微博主页的containerid，爬取微博内容时需要此id"""
+    data = use_proxy(url, proxy_addr)
+    content = json.loads(data).get('data')
+    for data in content.get('tabsInfo').get('tabs'):
+        if data.get('tab_type') == 'weibo':
+            container_id = data.get('containerid')
+    return container_id
+
+
+def get_weibo(id, file):
+    """获取微博内容信息,并保存到文本中，内容包括：每条微博的内容、微博详情页面地址、点赞数、评论数、转发数等"""
+    i = 1
+    while True:
+        url = 'https://m.weibo.cn/api/container/getIndex?type=uid&value='+id
+        weibo_url = 'https://m.weibo.cn/api/container/getIndex?type=uid&value=' + \
+                    id + '&containerid=' + get_container_id(url) + '&page=' + str(i)
         try:
-            request = urllib.request.Request(url)
-            response = urllib.request.urlopen(request)
-            raw_data = response.read().decode('utf-8')
-            json_data = json_pattern.search(raw_data).group(1)
-            data = json.loads(json_data)
-            return data
-        except urllib.error as e:
-            print("%d"%e.code)
-            return None
-
-    def get_encrypted_pw(self,data):
-        rsa_e = 65537 #0x10001
-        pw_string = str(data['servertime']) + '\t' + str(data['nonce']) + '\n' + str(self.password)
-        key = rsa.PublicKey(int(data['pubkey'],16),rsa_e)
-        pw_encypted = rsa.encrypt(pw_string.encode('utf-8'), key)
-        self.password = ''   #清空password
-        passwd = binascii.b2a_hex(pw_encypted)
-        print(passwd)
-        return passwd
-
-    def get_encrypted_name(self):
-        username_urllike   = urllib.request.quote(self.username)
-        username_encrypted = base64.b64encode(bytes(username_urllike,encoding='utf-8'))
-        return username_encrypted.decode('utf-8')
-
-    def enableCookies(self):
-            #建立一个cookies 容器
-            cookie_container = http.cookiejar.CookieJar()
-            #将一个cookies容器和一个HTTP的cookie的处理器绑定
-            cookie_support = urllib.request.HTTPCookieProcessor(cookie_container)
-            #创建一个opener,设置一个handler用于处理http的url打开
-            opener = urllib.request.build_opener(cookie_support, urllib.request.HTTPHandler)
-            #安装opener，此后调用urlopen()时会使用安装过的opener对象
-            urllib.request.install_opener(opener)
-
-    def build_post_data(self,raw):
-        post_data = {
-            "entry":"weibo",
-            "gateway":"1",
-            "from":"",
-            "savestate":"7",
-            "useticket":"1",
-            "pagerefer":"http://passport.weibo.com/visitor/visitor?entry=miniblog&a=enter&url=http%3A%2F%2Fweibo.com%2F&domain=.weibo.com&ua=php-sso_sdk_client-0.6.14",
-            "vsnf":"1",
-            "su":self.get_encrypted_name(),
-            "service":"miniblog",
-            "servertime":raw['servertime'],
-            "nonce":raw['nonce'],
-            "pwencode":"rsa2",
-            "rsakv":raw['rsakv'],
-            "sp":self.get_encrypted_pw(raw),
-            "sr":"1280*800",
-            "encoding":"UTF-8",
-            "prelt":"77",
-            "url":"http://weibo.com/ajaxlogin.php?framelogin=1&callback=parent.sinaSSOController.feedBackUrlCallBack",
-            "returntype":"META"
-        }
-        data = urllib.parse.urlencode(post_data).encode('utf-8')
-        return data
+            data = use_proxy(weibo_url, proxy_addr)
+            content = json.loads(data).get('data')
+            cards = content.get('cards')
+            if len(cards) > 0:
+                for j in range(len(cards)):
+                    # print("-----正在爬取第"+str(i)+"页，第"+str(j)+"条微博------")
+                    card_type = cards[j].get('card_type')
+                    if card_type == 9 :
+                        mblog = cards[j].get('mblog')
+                        attitudes_count = mblog.get('attitudes_count')
+                        comments_count = mblog.get('comments_count')
+                        created_at = mblog.get('created_at')
+                        reposts_count = mblog.get('reposts_count')
+                        scheme = cards[j].get('scheme')
+                        text = mblog.get('text')
+                        with open(file, 'a', encoding='utf-8') as fh:
+                            fh.write("----第"+str(i)+"页，第"+str(j)+"条微博----"+"\n")
+                            fh.write("微博地址："+str(scheme)+"\n"+"发布时间："+str(created_at)+"\n"+"微博内容："+text+"\n"+"点赞数："+str(attitudes_count)+"\n"+"评论数："+str(comments_count)+"\n"+"转发数："+str(reposts_count)+"\n")
+                i += 1
+            else:
+                break
+        except Exception as e:
+            print(e)
+            pass
 
 
-    def login(self):
-        url = 'http://login.sina.com.cn/sso/login.php?client=ssologin.js(v1.4.18)'
-        self.enableCookies()
-        data = self.get_prelogin_args()
-        post_data = self.build_post_data(data)
-        headers = {
-            "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36"
-        }
-        try:
-            request = urllib.request.Request(url=url,data=post_data,headers=headers)
-            response = urllib.request.urlopen(request)
-            html = response.read().decode('GBK')
-            #print(html)
-        except urllib.error as e:
-            print(e.code)
-
-        p = re.compile('location\.replace\(\'(.*?)\'\)')
-        p2 = re.compile(r'"userdomain":"(.*?)"')
-
-        try:
-            login_url = p.search(html).group(1)
-            print(login_url)
-            request = urllib.request.Request(login_url)
-            response = urllib.request.urlopen(request)
-            page = response.read().decode('utf-8')
-            print(page)
-            login_url = 'http://weibo.com/' + p2.search(page).group(1)
-            request = urllib.request.Request(login_url)
-            response = urllib.request.urlopen(request)
-            final = response.read().decode('utf-8')
-
-            print("Login success!")
-        except:
-            print('Login error!')
-            return 0
+if __name__ == "__main__":
+    user_id = ["6448871601", "1871808700", '3495498135']
