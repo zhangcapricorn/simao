@@ -23,21 +23,24 @@ def parser_jinse_blockchain(d, cmp_time):
         soup = get_soup(url_format % i)
         ol_list = soup.find_all("ol", class_="list clearfix")
         result = []
-        for ol in ol_list:
-            publish_time = ol.find_all("li", class_="left")[1].text
-            if "·" in publish_time:
-                publish_time = publish_time[3:]
+        try:
+            for ol in ol_list:
+                publish_time = ol.find_all("li", class_="left")[1].text
+                if "·" in publish_time:
+                    publish_time = publish_time[3:]
 
-            publish_time = modify_date(d, publish_time)
-            if compare_time(publish_time, cmp_time):
-                break
-            tag_a = ol.find("a")
-            title = filter_html_tag(tag_a.get("title"))
-            href = tag_a.get("href")
-            tag_span = ol.find("span", class_="line22 gray8")
-            detail = filter_html_tag(tag_span.text)
+                publish_time = modify_date(d, publish_time)
+                if compare_time(publish_time, cmp_time):
+                    raise ValueError
+                tag_a = ol.find("a")
+                title = filter_html_tag(tag_a.get("title"))
+                href = tag_a.get("href")
+                tag_span = ol.find("span", class_="line22 gray8")
+                detail = filter_html_tag(tag_span.text)
 
-            result.append([publish_time, 'jinse', title, detail])
+                result.append([publish_time, 'jinse', title, detail])
+        except ValueError as e:
+            break
     return result
 
 
@@ -54,32 +57,36 @@ def parser_jinse_lives(cmp_time):
         dk = data.keys()
         if len(dk) == 0:
             break
-        for k in dk:
-            for i in data[k]:
-                publish_time = i["publish_time"]
-                if publish_time == None:
-                    continue
-                if "·" in publish_time:
-                    publish_time = publish_time[3:]
 
-                if compare_time(publish_time, cmp_time):
-                    break
+        try:
+            for k in dk:
+                for i in data[k]:
+                    publish_time = i["publish_time"]
+                    if publish_time == None:
+                        continue
+                    if "·" in publish_time:
+                        publish_time = publish_time[3:]
 
-                content = i["content"]
-                d = []
-                if "】" in content:
-                    d = content.split("】")
-                elif "。" in content:
-                    d = content.split("。")
-                else:
-                    d = content.split(" ")
+                    if compare_time(publish_time, cmp_time):
+                        raise ValueError
 
-                if len(d) < 2:
-                    result.append([publish_time, "jinse", filter_html_tag(d[0]), ''])
-                else:
-                    result.append([publish_time, "jinse", filter_html_tag(d[0]), filter_html_tag(" ".join(d[1:]))])
-        id = id - 10
-        if id <= 10000:
+                    content = i["content"]
+                    d = []
+                    if "】" in content:
+                        d = content.split("】")
+                    elif "。" in content:
+                        d = content.split("。")
+                    else:
+                        d = content.split(" ")
+
+                    if len(d) < 2:
+                        result.append([publish_time, "jinse", filter_html_tag(d[0]), ''])
+                    else:
+                        result.append([publish_time, "jinse", filter_html_tag(d[0]), filter_html_tag(" ".join(d[1:]))])
+            id = id - 10
+            if id <= 10000:
+                break
+        except ValueError as e:
             break
     return result
 

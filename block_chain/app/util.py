@@ -29,15 +29,16 @@ def filter_html_tag(str_tag):
 
 
 def compare_time(publish_time, cmp_time):
-    if type(publish_time) == "str":
+    if publish_time == "0000-00-00 00:00:00":
+        return False
+    if isinstance(publish_time, str):
         if "/" in publish_time:
-            publish_time = publish_time.replace("/", "-")
-        try:
-            publish_time = datetime.datetime.strptime(publish_time, "%Y-%m-%d %H:%M:%S.%f")
-        except Exception:
-            publish_time = datetime.datetime.strptime(publish_time, "%Y-%m-%d %H:%M")
-    print(publish_time, type(publish_time))
-    print(cmp_time, type(cmp_time))
+            temp = publish_time.split(" ")
+            y, m, d = [int(i) for i in temp[0].split("/")]
+            h, s = [int(i) for i in temp[1].split(":")]
+            publish_time = datetime.datetime(y, m, d, h, s)
+        else:
+            publish_time = datetime.datetime.strptime(publish_time, "%Y-%m-%d %H:%M:%S")
     if cmp_time == "":
         return False
     else:
