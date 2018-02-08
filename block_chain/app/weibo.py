@@ -2,8 +2,15 @@
 
 import urllib.request
 import json
+import datetime
+import time
 
 
+from util import modify_date
+from util import filter_html_tag
+from util import compare_time
+
+user_ids = ["6448871601", "1871808700", '3495498135']
 proxy_addr="122.241.72.191:808" #设置代理IP
 
 
@@ -28,39 +35,44 @@ def get_container_id(url):
     return container_id
 
 
-def get_weibo(id, file):
+def get_weibo(id, d, cmp_time):
     """获取微博内容信息,并保存到文本中，内容包括：每条微博的内容、微博详情页面地址、点赞数、评论数、转发数等"""
     i = 1
+    year = str(d.year)
+    result = []
     while True:
         url = 'https://m.weibo.cn/api/container/getIndex?type=uid&value='+id
-        weibo_url = 'https://m.weibo.cn/api/container/getIndex?type=uid&value=' + \
-                    id + '&containerid=' + get_container_id(url) + '&page=' + str(i)
         try:
+            weibo_url = 'https://m.weibo.cn/api/container/getIndex?type=uid&value=' + \
+                        id + '&containerid=' + get_container_id(url) + '&page=' + str(i)
             data = use_proxy(weibo_url, proxy_addr)
             content = json.loads(data).get('data')
             cards = content.get('cards')
             if len(cards) > 0:
                 for j in range(len(cards)):
-                    # print("-----正在爬取第"+str(i)+"页，第"+str(j)+"条微博------")
                     card_type = cards[j].get('card_type')
-                    if card_type == 9 :
+                    if card_type == 9:
                         mblog = cards[j].get('mblog')
-                        attitudes_count = mblog.get('attitudes_count')
-                        comments_count = mblog.get('comments_count')
                         created_at = mblog.get('created_at')
-                        reposts_count = mblog.get('reposts_count')
-                        scheme = cards[j].get('scheme')
-                        text = mblog.get('text')
-                        with open(file, 'a', encoding='utf-8') as fh:
-                            fh.write("----第"+str(i)+"页，第"+str(j)+"条微博----"+"\n")
-                            fh.write("微博地址："+str(scheme)+"\n"+"发布时间："+str(created_at)+"\n"+"微博内容："+text+"\n"+"点赞数："+str(attitudes_count)+"\n"+"评论数："+str(comments_count)+"\n"+"转发数："+str(reposts_count)+"\n")
+                        created_at = modify_date(d, created_at)
+                        if len(str(created_at).split("-")) < 3:
+                            created_at = year + "-" + created_at
+                        if compare_time(created_at, cmp_time):
+                            raise ValueError
+                        text = filter_html_tag(mblog.get('text'))
+                        result.append([created_at, 'weibo', text, ''])
                 i += 1
             else:
                 break
+        except ValueError as v:
+            break
         except Exception as e:
-            print(e)
+            print(e, weibo_url)
             pass
+    return result
 
 
 if __name__ == "__main__":
     user_id = ["6448871601", "1871808700", '3495498135']
+    d = datetime.datetime.now()
+    get_weibo("2803301701", d, d)
