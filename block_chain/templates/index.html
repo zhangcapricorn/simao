@@ -3,11 +3,12 @@
         {% include "head.html" %}
         <script language="javascript" type="text/javascript">
             $(document).ready(function() {
-                $(".editTable").editable({
+                $("#title").editable({
                     type: 'text',
-                    pk: 1,
-                    url: '/post',
-                    title: 'Enter username'
+                    title: 'Enter username',
+                    success: function(response, newValue) {
+                        alert(newValue);
+                    }
                 });
             });
 
@@ -59,7 +60,7 @@
                             <table class="table">
                                 <tr><td>
                                     <font color="red">标题：</font>
-                                    <a href="#" id="{{result[i][0]}}" clss="editTable">
+                                    <a href="#" id="title" clss="dd">
                                         {{result[i][2]}}
                                     </a>
                                 </td></tr>
