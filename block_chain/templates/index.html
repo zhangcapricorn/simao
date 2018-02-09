@@ -1,0 +1,76 @@
+<html>
+    <head>
+        {% include "head.html" %}
+        <script language="javascript" type="text/javascript">
+            $(document).ready(function() {
+                $(".editTable").editable({
+                    type: 'text',
+                    pk: 1,
+                    url: '/post',
+                    title: 'Enter username'
+                });
+            });
+
+            function submit(object){
+                var ids = new Array();
+                $("#result :checkbox:checked").each(function(i){
+                    ids[i] = $(this).val();
+                });
+
+                if(ids.length > 5){
+                    alert("请选择5条以内的咨讯");
+                }else{
+                    var params = {ids:JSON.stringify(ids)};
+                    $.ajax({
+                        type : "post",
+                        dataType : "json",
+                        url : "/blockChain/index",
+                        data : params,
+                        success : function(data){
+                            alert(data["ok"]);
+                        }
+                    })
+                }
+            }
+        </script>
+
+        <style type="text/css">
+            img{
+                display:block;
+                width:135px;
+            }
+        </style>
+    </head>
+    <body>
+        <button type="button" id="submit" class="btn btn-primary" onclick="submit(this);">提交</button>
+        <table class="table text-nowrap" id="result">
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>详情</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in range(0, num)%}
+                    <tr>
+                        <td><input type="checkbox" id="ck" value="{{result[i][0]}}"></td>
+                        <td>{{result[i][1]}}</td>
+                        <td>
+                            <table class="table">
+                                <tr><td>
+                                    <font color="red">标题：</font>
+                                    <a href="#" id="{{result[i][0]}}" clss="editTable">
+                                        {{result[i][2]}}
+                                    </a>
+                                </td></tr>
+                                <tr><td>
+                                    <font color="red">摘要：</font>{{result[i][3]}}
+                                </td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                {% end %}
+            </tbody>
+        </table>
+    </body>
+</html>

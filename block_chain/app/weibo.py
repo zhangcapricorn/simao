@@ -59,7 +59,7 @@ def get_weibo(id, d, cmp_time):
                             created_at = year + "-" + created_at
                         if compare_time(created_at, cmp_time):
                             raise ValueError
-                        text = filter_html_tag(mblog.get('text'))
+                        text = filter_html_tag(mblog.get('text').strip())
                         result.append([created_at, 'weibo', text, ''])
                 i += 1
             else:

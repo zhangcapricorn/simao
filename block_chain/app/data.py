@@ -38,7 +38,7 @@ def parser_jinse_blockchain(d, cmp_time):
                 tag_span = ol.find("span", class_="line22 gray8")
                 detail = filter_html_tag(tag_span.text)
 
-                result.append([publish_time, 'jinse', title, detail])
+                result.append([publish_time, 'jinse', title.strip(), detail.strip()])
         except ValueError as e:
             break
     return result
@@ -80,9 +80,9 @@ def parser_jinse_lives(cmp_time):
                         d = content.split(" ")
 
                     if len(d) < 2:
-                        result.append([publish_time, "jinse", filter_html_tag(d[0]), ''])
+                        result.append([publish_time, "jinse", filter_html_tag(d[0].strip()), ''])
                     else:
-                        result.append([publish_time, "jinse", filter_html_tag(d[0]), filter_html_tag(" ".join(d[1:]))])
+                        result.append([publish_time, "jinse", filter_html_tag(d[0].strip()), filter_html_tag(" ".join(d[1:].strip()))])
             id = id - 10
             if id <= 10000:
                 break

@@ -1,12 +1,21 @@
 # -*- coding: utf-8 -*-
 
 import os
-import pymysql
+
 import tornado.ioloop
 import tornado.web
+import datetime
 from tornado.options import define, options
 
+from util import select_from_db
+from util import draw_detail
+from util import draw_list
+from util import send_email
+
+
 define("port", default="8888", help="run on the given port", type=int)
+
+
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = {
@@ -26,11 +35,35 @@ class Application(tornado.web.Application):
 
 class Index(tornado.web.RequestHandler):
     def get(self):
-        page = self.get_argument("page")
+        page = int(self.get_argument("page"))
         end = page * 10
         start = end - 10
-        db = pymysql.connect("10.255.254.208", "root", "dell1950", 'Dictionary', use_unicode=True, charset="utf8")
-        cursor = db.cursor()
-        cursor.execute("select * from block_chain order by date desc limit start, end" % (start, end))
-        result = [i for i in cursor.fetchall()]
-        db.close()
+
+        sql = "select * from block_chain order by date desc limit %s, %s" % (start, end)
+        db_info = select_from_db(sql)
+        result = [[i[0], datetime.datetime.strftime(i[1], '%Y-%m-%d %H:%M:%S'), i[3], i[4]] for i in db_info]
+        self.render("index.html", result=result, num=len(result))
+
+    def post(self):
+        ids = self.get_argument("ids")[1:-1].split(",")
+        param = ",".join(ids)
+
+        sql = "select date, title, summary from block_chain where id in (%s)" % param
+        result = select_from_db(sql)
+        draw_list(result)
+        file_list = []
+        for i in range(0, len(result)):
+            draw_detail(result[i], i)
+            file_list.append("%s.png" % i)
+        file_list.append("list.png")
+        send_email(file_list)
+
+
+def main():
+    tornado.options.parse_command_line()
+    Application().listen(options.port)
+    tornado.ioloop.IOLoop.instance().start()
+
+
+if __name__ == '__main__':
+    main()
