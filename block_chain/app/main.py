@@ -17,7 +17,7 @@ def do_job(d, cmp_time):
     result.extend(data.parser_jinse_blockchain(d, cmp_time))
     result.extend(data.parser_jinse_lives(cmp_time))
 
-    db = pymysql.connect("10.255.254.208", "root", "dell1950", 'Dictionary', use_unicode=True, charset="utf8")
+    db = pymysql.connect("47.96.4.38", "root", "Xyb909", 'block_chain', use_unicode=True, charset="utf8")
     cursor = db.cursor()
     cursor.execute('SET NAMES utf8;')
     cursor.execute('SET CHARACTER SET utf8;')
@@ -32,12 +32,10 @@ def do_loop():
     while True:
         d = datetime.datetime.now()
         do_job(d, cmp_time)
-        time.sleep(60)
+        time.sleep(1800)
         cmp_time = d
-        print(d)
+        print("start over ; %s" % d)
 
 
 if __name__ == "__main__":
-    # do_loop()
-
-    send_email(["list.png"])
+    do_loop()

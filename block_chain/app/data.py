@@ -82,7 +82,7 @@ def parser_jinse_lives(cmp_time):
                     if len(d) < 2:
                         result.append([publish_time, "jinse", filter_html_tag(d[0].strip()), ''])
                     else:
-                        result.append([publish_time, "jinse", filter_html_tag(d[0].strip()), filter_html_tag(" ".join(d[1:].strip()))])
+                        result.append([publish_time, "jinse", filter_html_tag(d[0].strip()), filter_html_tag(" ".join(d[1:]))])
             id = id - 10
             if id <= 10000:
                 break

@@ -53,7 +53,7 @@ def compare_time(publish_time, cmp_time):
 
 
 def select_from_db(sql):
-    db = pymysql.connect("10.255.254.208", "root", "dell1950", 'Dictionary', use_unicode=True, charset="utf8")
+    db = pymysql.connect("47.96.4.38", "root", "Xyb909", 'block_chain', use_unicode=True, charset="utf8")
     cursor = db.cursor()
     cursor.execute(sql)
     result = [i for i in cursor.fetchall()]
