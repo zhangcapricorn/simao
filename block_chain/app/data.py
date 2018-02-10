@@ -19,7 +19,7 @@ def get_soup(url):
 def parser_jinse_blockchain(d, cmp_time):
     url_format = "http://www.jinse.com/blockchain/page_%s"
     result = []
-    for i in range(1, 10):
+    for i in range(1, 11):
         soup = get_soup(url_format % i)
         ol_list = soup.find_all("ol", class_="list clearfix")
         result = []

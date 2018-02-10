@@ -23,7 +23,9 @@ def do_job(d, cmp_time):
     cursor.execute('SET CHARACTER SET utf8;')
     cursor.execute('SET character_set_connection=utf8;')
     sql = "insert into block_chain values (null, %s, %s, %s, %s)"
+
     cursor.executemany(sql, result)
+    db.commit()
     db.close()
 
 

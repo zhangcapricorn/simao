@@ -3,24 +3,14 @@
         {% include "head.html" %}
         <script language="javascript" type="text/javascript">
             $(document).ready(function() {
-                {% include "index.js" %}
+                $('#tt').editable();
             });
-
-            function editTitle(object){
-                 $("#title").editable({
-                    type: 'text',
-                    title: 'Enter username',
-                    success: function(response, newValue) {
-                        alert(newValue);
-                    }
-                });
-            }
-
             function submit(object){
                 var ids = new Array();
                 $("#result :checkbox:checked").each(function(i){
                     ids[i] = $(this).val();
                 });
+                alert(ids.length);
                 if(ids.length == 0){
                     alert("请选择要咨讯");
                 }else if(ids.length > 5){
@@ -50,7 +40,7 @@
     </head>
     <body>
         <button type="button" id="submit" class="btn btn-primary" onclick="submit(this);">提交</button>
-        <table data-toggle="table">
+        <table class="table" id="result">
             <thead>
                 <tr>
                     <th>日期</th>
@@ -63,10 +53,10 @@
                         <td><input type="checkbox" id="ck" value="{{result[i][0]}}"></td>
                         <td>{{result[i][1]}}</td>
                         <td>
-                            <table data-toggle="table">
+                            <table class="table">
                                 <tr><td id="td_title">
                                     <font color="red">标题：</font>
-                                    <a href="#" id="title" data-type="text" data-pk="1">
+                                    <a href="#" id="tt" class="ck" data-type="text" data-title="用户名">
                                         {{result[i][2]}}
                                     </a>
                                 </td></tr>
