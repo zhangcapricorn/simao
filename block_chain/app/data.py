@@ -34,7 +34,6 @@ def parser_jinse_blockchain(d, cmp_time):
                     raise ValueError
                 tag_a = ol.find("a")
                 title = filter_html_tag(tag_a.get("title"))
-                href = tag_a.get("href")
                 tag_span = ol.find("span", class_="line22 gray8")
                 detail = filter_html_tag(tag_span.text)
 
@@ -44,12 +43,41 @@ def parser_jinse_blockchain(d, cmp_time):
     return result
 
 
+def get_publish_date(i, now):
+    week_map = {"一": 0, "二": 1, "三": 2, "四": 3, "五": 4, "六": 5, "日": 6}
+    publish_time = i["publish_time"]
+    if publish_time == None:
+        year = now.year
+        month = now.month
+        day = now.day
+        create_time = i["created_at"]
+        if "今天" in i["day_name"]:
+            publish_time = "%s-%s-%s %s:00" % (year, month, day, create_time)
+        elif "昨天" in i["day_name"]:
+            yester_day = (now - datetime.timedelta(days=int(1))).day
+            publish_time = "%s-%s-%s %s:00" % (year, month, yester_day, create_time)
+        elif "前天" in i["day_name"]:
+            the_day = (now - datetime.timedelta(days=int(2))).day
+            publish_time = "%s-%s-%s %s:00" % (year, month, the_day, create_time)
+        else:
+            week = i["week_name"]
+            p = week_map[week[-1]]
+            n_w = now.weekday()
+            the_day = (now - datetime.timedelta(days=int(n_w - p))).day
+            publish_time = "%s-%s-%s %s:00" % (year, month, the_day, create_time)
+
+    if "·" in publish_time:
+        publish_time = publish_time[3:]
+    return publish_time
+
+
 def parser_jinse_lives(cmp_time):
     soup = get_soup("http://www.jinse.com/lives")
     li = soup.find("li", attrs={"class": re.compile("clearfix")})
     id = int(li.get("data-id"))
     url_format = "http://www.jinse.com/ajax/lives/getList?search=&id=%s&flag=down"
     result = []
+    now = datetime.datetime.now()
     while True:
         req = requests.get(url_format % (id))
         js = json.loads(req.text)
@@ -57,15 +85,10 @@ def parser_jinse_lives(cmp_time):
         dk = data.keys()
         if len(dk) == 0:
             break
-
         try:
             for k in dk:
                 for i in data[k]:
-                    publish_time = i["publish_time"]
-                    if publish_time == None:
-                        continue
-                    if "·" in publish_time:
-                        publish_time = publish_time[3:]
+                    publish_time = get_publish_date(i, now)
 
                     if compare_time(publish_time, cmp_time):
                         raise ValueError
@@ -83,6 +106,7 @@ def parser_jinse_lives(cmp_time):
                         result.append([publish_time, "jinse", filter_html_tag(d[0].strip()), ''])
                     else:
                         result.append([publish_time, "jinse", filter_html_tag(d[0].strip()), filter_html_tag(" ".join(d[1:]))])
+
             id = id - 10
             if id <= 10000:
                 break
@@ -92,6 +116,11 @@ def parser_jinse_lives(cmp_time):
 
 
 if __name__ == "__main__":
-    a = '2017-10-18 22:17:46'
-    b = '2017-10-19 22:17:40'
-    print(b > a)
+    # week = "星期六"
+    # week_map = {"一":0, "二":1, "三":2, "四":3, "五":4, "六":5, "日":6}
+    # p = week_map[week[-1]]
+    # now = datetime.datetime.now()
+    # n_w = now.weekday()
+    # print()
+    # print((now - datetime.timedelta(days=int(n_w - p))).day)
+    parser_jinse_lives("")

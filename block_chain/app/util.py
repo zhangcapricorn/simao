@@ -12,11 +12,11 @@ from email.mime.application import MIMEApplication
 
 def modify_date(now, before_time):
     if "小时" in before_time:
-        return now - datetime.timedelta(hours=int(re.sub("\D", "", before_time)))
+        return (now - datetime.timedelta(hours=int(re.sub("\D", "", before_time)))).strftime("%Y-%m-%d %H:%M:%S")
     elif "分钟" in before_time:
-        return now - datetime.timedelta(minutes=int(re.sub("\D", "", before_time)))
+        return (now - datetime.timedelta(minutes=int(re.sub("\D", "", before_time)))).strftime("%Y-%m-%d %H:%M:%S")
     elif "昨天" in before_time:
-        return now - datetime.timedelta(days=int(re.sub("\D", "", before_time)))
+        return (now - datetime.timedelta(days=int(re.sub("\D", "", before_time)))).strftime("%Y-%m-%d %H:%M:%S")
     elif "刚刚" in before_time:
         return now
     else:
@@ -140,7 +140,7 @@ def draw_detail(detail, num):
 def send_email(file_list):
     sender = 'liudiyuhan1@163.com'
     password = '851102ldyh*'
-    receivers = ';'.join(["liudiyuhan@dangdang.com"])
+    receivers = ';'.join(["zhangqiannan@dangdang.com", '408621756@qq.com'])
     msg = MIMEMultipart()
     msg['Subject'] = '图片'
     msg['From'] = sender
