@@ -14,7 +14,7 @@ from util import draw_list
 from util import send_email
 
 
-define("port", default="8888", help="run on the given port", type=int)
+define("port", default="8006", help="run on the given port", type=int)
 
 
 class Application(tornado.web.Application):
@@ -45,7 +45,7 @@ class Index(tornado.web.RequestHandler):
 
         sql = "select * from block_chain order by date desc limit %s, %s" % (start, end)
         db_info = select_from_db(sql)
-        result = [[i[0], datetime.datetime.strftime(i[1], '%Y-%m-%d %H:%M:%S'), i[2], i[3], i[4]] for i in db_info]
+        result = [[i[0], datetime.datetime.strftime(i[1], '%Y-%m-%d-%H:%M:%S'), i[2], i[3], i[4]] for i in db_info]
         self.render("index.html", result=result, num=len(result))
 
     def post(self):

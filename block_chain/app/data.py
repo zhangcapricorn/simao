@@ -20,7 +20,8 @@ def parser_jinse_blockchain(d, cmp_time):
     url_format = "http://www.jinse.com/blockchain/page_%s"
     result = []
     for i in range(1, 11):
-        soup = get_soup(url_format % i)
+        url = url_format % i
+        soup = get_soup(url)
         ol_list = soup.find_all("ol", class_="list clearfix")
         result = []
         try:
@@ -36,8 +37,9 @@ def parser_jinse_blockchain(d, cmp_time):
                 title = filter_html_tag(tag_a.get("title"))
                 tag_span = ol.find("span", class_="line22 gray8")
                 detail = filter_html_tag(tag_span.text)
-
-                result.append([publish_time, 'jinse', title.strip(), detail.strip()])
+                if "ZBcom公布HOTC上线计划" in title:
+                    print(url_format % i)
+                result.append([publish_time, 'jinse-block', title.strip(), detail.strip(), url])
         except ValueError as e:
             break
     return result
@@ -60,11 +62,12 @@ def get_publish_date(i, now):
             the_day = (now - datetime.timedelta(days=int(2))).day
             publish_time = "%s-%s-%s %s:00" % (year, month, the_day, create_time)
         else:
-            week = i["week_name"]
-            p = week_map[week[-1]]
-            n_w = now.weekday()
-            the_day = (now - datetime.timedelta(days=int(n_w - p))).day
-            publish_time = "%s-%s-%s %s:00" % (year, month, the_day, create_time)
+            publish_time = "%s-01-01 %s:00" % (year, create_time)
+            # week = i["week_name"]
+            # p = week_map[week[-1]]
+            # n_w = now.weekday()
+            # the_day = (now - datetime.timedelta(days=int(n_w - p))).day
+            # publish_time = "%s-%s-%s %s:00" % (year, month, the_day, create_time)
 
     if "·" in publish_time:
         publish_time = publish_time[3:]
@@ -79,7 +82,8 @@ def parser_jinse_lives(cmp_time):
     result = []
     now = datetime.datetime.now()
     while True:
-        req = requests.get(url_format % (id))
+        url = url_format % (id)
+        req = requests.get(url)
         js = json.loads(req.text)
         data = js["data"]
         dk = data.keys()
@@ -103,9 +107,9 @@ def parser_jinse_lives(cmp_time):
                         d = content.split(" ")
 
                     if len(d) < 2:
-                        result.append([publish_time, "jinse", filter_html_tag(d[0].strip()), ''])
+                        result.append([publish_time, "jinse-lives", filter_html_tag(d[0].strip()), '', url])
                     else:
-                        result.append([publish_time, "jinse", filter_html_tag(d[0].strip()), filter_html_tag(" ".join(d[1:]))])
+                        result.append([publish_time, "jinse-lives", filter_html_tag(d[0].strip()), filter_html_tag(" ".join(d[1:])), url])
 
             id = id - 10
             if id <= 10000:

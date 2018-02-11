@@ -60,7 +60,7 @@ def get_weibo(id, d, cmp_time):
                         if compare_time(created_at, cmp_time):
                             raise ValueError
                         text = filter_html_tag(mblog.get('text').strip())
-                        result.append([created_at, 'weibo', text, ''])
+                        result.append([created_at, 'weibo', text, '', weibo_url])
                 i += 1
             else:
                 break

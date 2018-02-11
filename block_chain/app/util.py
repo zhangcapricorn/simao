@@ -77,8 +77,10 @@ def cut_out_word(word, length):
 def draw_list(info):
     back_img = Image.open("../static/img/background.png").convert("RGBA")
     new_img = Image.new("RGBA", back_img.size, (0, 0, 0, 0))
-    date_font = ImageFont.truetype(os.path.join("fonts", "msyh.ttf"), 23)
-    word_font = ImageFont.truetype(os.path.join("fonts", "msyh.ttf"), 24)
+    date_font = ImageFont.truetype(os.path.join("/usr/share/fonts", "msyh.ttf"), 23)
+    word_font = ImageFont.truetype(os.path.join("/usr/share/fonts", "msyh.ttf"), 24)
+    # date_font = ImageFont.truetype(os.path.join("fonts", "msyh.ttf"), 23)
+    # word_font = ImageFont.truetype(os.path.join("fonts", "msyh.ttf"), 24)
     d = ImageDraw.Draw(new_img)
     the_now = datetime.datetime.strftime(datetime.datetime.now(), "%y-%m-%d")
     d.text((new_img.size[0] - 620, new_img.size[1] - 850),
@@ -106,8 +108,10 @@ def draw_list(info):
 def draw_detail(detail, num):
     back_img = Image.open("../static/img/background.png").convert("RGBA")
     new_img = Image.new("RGBA", back_img.size, (0, 0, 0, 0))
-    date_font = ImageFont.truetype(os.path.join("fonts", "msyh.ttf"), 23)
-    title_font = ImageFont.truetype(os.path.join("fonts", "msyh.ttf"), 25)
+    date_font = ImageFont.truetype(os.path.join("/usr/share/fonts", "msyh.ttf"), 23)
+    title_font = ImageFont.truetype(os.path.join("/usr/share/fonts", "msyh.ttf"), 25)
+    # date_font = ImageFont.truetype(os.path.join("fonts", "msyh.ttf"), 23)
+    # title_font = ImageFont.truetype(os.path.join("fonts", "msyh.ttf"), 25)
     d = ImageDraw.Draw(new_img)
     the_now = datetime.datetime.strftime(datetime.datetime.now(), "%y-%m-%d")
     d.text((new_img.size[0] - 620, new_img.size[1] - 850),
@@ -153,6 +157,7 @@ def send_email(file_list):
 
     client = smtplib.SMTP()
     client.connect('smtp.163.com')
+    client.starttls()
     client.login(sender, password)
     client.sendmail(sender, receivers, msg.as_string())
     client.quit()
