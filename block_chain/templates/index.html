@@ -3,14 +3,47 @@
         {% include "head.html" %}
         <script language="javascript" type="text/javascript">
             $(document).ready(function() {
-                $('#tt').editable();
+                $('.mt').editable({
+                    type: 'text',
+                    title: '修改标题',
+                    success: function(response, newValue) {
+                        var params = {id:$(this).attr("id"), value:newValue};
+                        $.ajax({
+                            type : "post",
+                            dataType : "json",
+                            url : "/blockChain/title",
+                            data : params,
+                            success : function(data){
+                                alert(data["ok"]);
+                            }
+                        })
+                    }
+                });
+
+                $('.md').editable({
+                    type: 'text',
+                    title: '修改详情',
+                    success: function(response, newValue) {
+                        var params = {id:$(this).attr("id"), value:newValue};
+                        $.ajax({
+                            type : "post",
+                            dataType : "json",
+                            url : "/blockChain/detail",
+                            data : params,
+                            success : function(data){
+                                alert(data["ok"]);
+                            }
+                        })
+                    }
+                });
             });
+
             function submit(object){
                 var ids = new Array();
                 $("#result :checkbox:checked").each(function(i){
                     ids[i] = $(this).val();
                 });
-                alert(ids.length);
+
                 if(ids.length == 0){
                     alert("请选择要咨讯");
                 }else if(ids.length > 5){
@@ -31,20 +64,16 @@
 
         </script>
 
-        <style type="text/css">
-            img{
-                display:block;
-                width:135px;
-            }
-        </style>
     </head>
     <body>
         <button type="button" id="submit" class="btn btn-primary" onclick="submit(this);">提交</button>
         <table class="table" id="result">
             <thead>
                 <tr>
-                    <th>日期</th>
-                    <th>详情</th>
+                    <th>--</th>
+                    <th>日 期</th>
+                    <th>平 台</th>
+                    <th>详 情</th>
                 </tr>
             </thead>
             <tbody>
@@ -52,16 +81,20 @@
                     <tr>
                         <td><input type="checkbox" id="ck" value="{{result[i][0]}}"></td>
                         <td>{{result[i][1]}}</td>
+                        <td>{{result[i][2]}}</td>
                         <td>
                             <table class="table">
                                 <tr><td id="td_title">
                                     <font color="red">标题：</font>
-                                    <a href="#" id="tt" class="ck" data-type="text" data-title="用户名">
-                                        {{result[i][2]}}
+                                    <a href="#" id="{{result[i][0]}}" class="mt">
+                                        {{result[i][3]}}
                                     </a>
                                 </td></tr>
                                 <tr><td>
-                                    <font color="red">摘要：</font>{{result[i][3]}}
+                                    <font color="red">摘要：</font>
+                                    <a href="#" id="{{result[i][0]}}d" class="md">
+                                        {{result[i][4]}}
+                                    </a>
                                 </td></tr>
                             </table>
                         </td>

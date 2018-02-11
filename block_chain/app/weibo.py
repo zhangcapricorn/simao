@@ -67,7 +67,6 @@ def get_weibo(id, d, cmp_time):
         except ValueError as v:
             break
         except Exception as e:
-            print(e, weibo_url)
             pass
     return result
 

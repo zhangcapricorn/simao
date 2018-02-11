@@ -57,6 +57,7 @@ def select_from_db(sql):
     cursor = db.cursor()
     cursor.execute(sql)
     result = [i for i in cursor.fetchall()]
+    db.commit()
     db.close()
     return result
 
@@ -139,8 +140,7 @@ def draw_detail(detail, num):
 def send_email(file_list):
     sender = 'liudiyuhan1@163.com'
     password = '851102ldyh*'
-    # receivers = ';'.join(["liudiyuhan@dangdang.com", '408621756@qq.com'])
-    receivers = ';'.join(['408621756@qq.com'])
+    receivers = ';'.join(["liudiyuhan@dangdang.com"])
     msg = MIMEMultipart()
     msg['Subject'] = '图片'
     msg['From'] = sender
