@@ -102,7 +102,7 @@ def draw_list(info):
     out = Image.alpha_composite(back_img, new_img)
     tt = Image.alpha_composite(out, Image.open("../static/img/logo.png").convert("RGBA"))
     # tt.show()
-    tt.save("../result/list.png")
+    tt.save("/data/web/wwwroot/image/list_bc.png")
 
 
 def draw_detail(detail, num):
@@ -138,7 +138,8 @@ def draw_detail(detail, num):
     out = Image.alpha_composite(back_img, new_img)
     tt = Image.alpha_composite(out, Image.open("../static/img/logo.png").convert("RGBA"))
     # tt.show()
-    tt.save("../result/%s.png" % num)
+    tt.save("/data/web/wwwroot/image/%s_bc.png" % num)
+    # tt.save("../result/%s.png" % num)
 
 
 def send_email(file_list):
@@ -161,3 +162,16 @@ def send_email(file_list):
     client.login(sender, password)
     client.sendmail(sender, receivers, msg.as_string())
     client.quit()
+
+img_dir = "/data/web/wwwroot/image/"
+def get_files():
+    file_list = []
+    for root, dirs, files in os.walk(img_dir):
+        if "_bc.png" in files:
+            file_list.append(files)
+    return
+
+def del_files():
+    for root, dirs, files in os.walk(img_dir):
+        if "_bc.png" in files:
+            os.remove(os.path.join(dir, files))

@@ -56,7 +56,9 @@
                         url : "/blockChain/index",
                         data : params,
                         success : function(data){
-                            alert(data["ok"]);
+                            $("#image").empty();
+                            img_link = "http://47.96.4.38:8006//blockChain/images?files=" + data["files"];
+                            $("#image").append('<a target="_blank" href="http://47.96.4.38:8006/blockChain/images?files=' + data["files"] + '">查看图片</a>')
                         }
                     })
                 }
@@ -67,6 +69,7 @@
     </head>
     <body>
         <button type="button" id="submit" class="btn btn-primary" onclick="submit(this);">提交</button>
+        <div id="image"></div>
         <table class="table" id="result">
             <thead>
                 <tr>

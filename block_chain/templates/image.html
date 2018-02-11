@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {% include "head.html" %}
+</head>
+<body>
+        <table class="table" id="result">
+            <thead>
+                <tr>
+                    <th>图片链接</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in result %}
+                    <tr>
+                        <td><a href="{{i}}">{{i}}</a></td>
+                    </tr>
+                {% end %}
+            </tbody>
+        </table>
+    </body>
+</html>
