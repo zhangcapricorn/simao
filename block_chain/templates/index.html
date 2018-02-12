@@ -57,8 +57,7 @@
                         data : params,
                         success : function(data){
                             $("#image").empty();
-                            img_link = "http://47.96.4.38:8006//blockChain/images?files=" + data["files"];
-                            $("#image").append('<a target="_blank" href="http://47.96.4.38:8006/blockChain/images?files=' + data["files"] + '">查看图片</a>')
+                            $("#image").append('<a target="_blank" href="http://47.96.4.38:8006/blockChain/images?time_stmp=' + data["time_stmp"] + '">查看图片</a>')
                         }
                     })
                 }

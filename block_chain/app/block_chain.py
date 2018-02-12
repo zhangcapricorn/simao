@@ -6,12 +6,14 @@ import tornado.ioloop
 import tornado.web
 import datetime
 import json
+import time
 from tornado.options import define, options
 
 from util import select_from_db
 from util import draw_detail
 from util import draw_list
 from util import del_files
+from util import get_files
 
 
 define("port", default="8006", help="run on the given port", type=int)
@@ -55,14 +57,15 @@ class Index(tornado.web.RequestHandler):
 
         sql = "select date, title, summary from block_chain where id in (%s)" % param
         result = select_from_db(sql)
-        draw_list(result)
+        time_stmp = int(time.time())
+        draw_list(result, time_stmp)
         file_list = []
         for i in range(0, len(result)):
-            draw_detail(result[i], i)
-            file_list.append("%s" % i)
-        file_list.append("list")
-        del_files()
-        self.write(json.dumps({'files': "_".join(file_list)}))
+            draw_detail(result[i], i, time_stmp)
+            file_list.append("%s_%s" % (i, time_stmp))
+        file_list.append("list_%s" % time_stmp)
+        del_files(time_stmp)
+        self.write(json.dumps({'time_stmp': time_stmp}))
 
 
 class Title(tornado.web.RequestHandler):
@@ -85,9 +88,9 @@ class Detail(tornado.web.RequestHandler):
 
 class BCImg(tornado.web.RequestHandler):
     def get(self):
-        files = self.get_argument("files")
-        file_list = files.split("_")
-        href = ["http://47.96.4.38:8009/%s_bc.png" % i for i in file_list]
+        time_stmp = self.get_argument("time_stmp")
+        file_list = get_files(time_stmp)
+        href = ["http://47.96.4.38:8009/%s" % i for i in file_list]
         self.render("image.html", result=href)
 
 

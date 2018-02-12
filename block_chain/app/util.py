@@ -8,9 +8,11 @@ import math
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
+import textwrap
 
 
 def modify_date(now, before_time):
+    """格式化时间"""
     if "小时" in before_time:
         return (now - datetime.timedelta(hours=int(re.sub("\D", "", before_time)))).strftime("%Y-%m-%d %H:%M:%S")
     elif "分钟" in before_time:
@@ -24,6 +26,7 @@ def modify_date(now, before_time):
 
 
 def filter_html_tag(str_tag):
+    """过滤html代码"""
     line = str_tag.rstrip()
     pattern = re.compile(r'<([^>]*)>')
 
@@ -33,6 +36,7 @@ def filter_html_tag(str_tag):
 
 
 def compare_time(publish_time, cmp_time):
+    """比较出版时间是否小于目标时间，如果小不进行爬取"""
     if publish_time == "0000-00-00 00:00:00":
         return False
     if isinstance(publish_time, str):
@@ -53,6 +57,7 @@ def compare_time(publish_time, cmp_time):
 
 
 def select_from_db(sql):
+    """数据库取值"""
     db = pymysql.connect("47.96.4.38", "root", "Xyb909", 'block_chain', use_unicode=True, charset="utf8")
     cursor = db.cursor()
     cursor.execute(sql)
@@ -62,25 +67,51 @@ def select_from_db(sql):
     return result
 
 
+def get_word_num(word):
+    num = 0
+    for i in word:
+        if i >= u'\u4e00' and i <= u'\u9fa5':
+            num += 2
+        else:
+            num += 1
+    return num
+
+
 def cut_out_word(word, length):
-    t_n = math.ceil(len(word) / length)
-    word_list = []
-    begin = 0
-    end = length
-    for n in range(t_n):
-        word_list.append(word[begin:end])
-        begin = end
-        end = begin + length
-    return word_list
+    """根据中英文拼接字符串"""
+    result = []
+    num = 0
+    sum_num = 0
+    temp = ""
+    w_n = get_word_num(word)
+    if w_n <= length:
+        result.append(word)
+    else:
+        for i in word:
+            if i >= u'\u4e00' and i <= u'\u9fa5':
+                num += 2
+                sum_num += 2
+            else:
+                num += 1
+                sum_num += 1
+
+            if num >= length:
+                num = 0
+                result.append(temp)
+                temp = i
+            else:
+                temp = temp + i
+        if temp != "":
+            result.append(temp)
+    return result
 
 
-def draw_list(info):
+def draw_list(info, time_stmp):
+    """画清单图片"""
     back_img = Image.open("../static/img/background.png").convert("RGBA")
     new_img = Image.new("RGBA", back_img.size, (0, 0, 0, 0))
     date_font = ImageFont.truetype(os.path.join("/usr/share/fonts", "msyh.ttf"), 23)
     word_font = ImageFont.truetype(os.path.join("/usr/share/fonts", "msyh.ttf"), 24)
-    # date_font = ImageFont.truetype(os.path.join("fonts", "msyh.ttf"), 23)
-    # word_font = ImageFont.truetype(os.path.join("fonts", "msyh.ttf"), 24)
     d = ImageDraw.Draw(new_img)
     the_now = datetime.datetime.strftime(datetime.datetime.now(), "%y-%m-%d")
     d.text((new_img.size[0] - 620, new_img.size[1] - 850),
@@ -91,58 +122,62 @@ def draw_list(info):
     info_num = len(info)
     for i in range(0, info_num):
         tmp = str(i + 1) + ". " + info[i][1]
-        word_list = cut_out_word(tmp, 23)
+        # t_w = textwrap.wrap(tmp, width=27)
+        # for t in t_w:
+        #     d.text((new_img.size[0] - 620, new_img.size[1] - h), t, font=word_font, fill="#000000")
+        #     h -= 26
+        word_list = cut_out_word(tmp, 45)
         for word in word_list:
             d.text((new_img.size[0] - 620, new_img.size[1] - h),
                    word,
                    font=word_font,
                    fill="#000000")
-            h -= 28
-        h -= 30
+            h -= 26
+        h -= 25
     out = Image.alpha_composite(back_img, new_img)
     tt = Image.alpha_composite(out, Image.open("../static/img/logo.png").convert("RGBA"))
     # tt.show()
-    tt.save("/data/web/wwwroot/image/list_bc.png")
+    tt.save("/data/web/wwwroot/image/list_%s.png" % time_stmp)
 
 
-def draw_detail(detail, num):
+def draw_detail(detail, num, time_stmp):
+    """画详情图片"""
     back_img = Image.open("../static/img/background.png").convert("RGBA")
     new_img = Image.new("RGBA", back_img.size, (0, 0, 0, 0))
     date_font = ImageFont.truetype(os.path.join("/usr/share/fonts", "msyh.ttf"), 23)
-    title_font = ImageFont.truetype(os.path.join("/usr/share/fonts", "msyh.ttf"), 25)
-    # date_font = ImageFont.truetype(os.path.join("fonts", "msyh.ttf"), 23)
-    # title_font = ImageFont.truetype(os.path.join("fonts", "msyh.ttf"), 25)
+    title_font = ImageFont.truetype(os.path.join("/usr/share/fonts", "msyh.ttf"), 26)
+    word_font = ImageFont.truetype(os.path.join("/usr/share/fonts", "simsun.ttf"), 27)
     d = ImageDraw.Draw(new_img)
     the_now = datetime.datetime.strftime(datetime.datetime.now(), "%y-%m-%d")
     d.text((new_img.size[0] - 620, new_img.size[1] - 850),
-           the_now + "                                            专题咨讯",
+           the_now + "                                            专题资讯",
            font=date_font,
            fill="#000000")
     h = 800
-    title_list = cut_out_word("【" + detail[1] + "】", 23)
+    title_list = cut_out_word("【" + detail[1] + "】", 40)
     for title in title_list:
         d.text((new_img.size[0] - 620, new_img.size[1] - h),
                title,
                font=title_font,
                fill="#000000")
-        h -= 28
-    h -= 15
-    d_list = cut_out_word(detail[2], 23)
+        h -= 33
+    h -= 35
+    d_list = cut_out_word(detail[2], 40)
     for de in d_list:
-        d.text((new_img.size[0] - 620, new_img.size[1] - h),
+        d.text((30, new_img.size[1] - h),
                de,
-               font=title_font,
+               font=word_font,
                fill="#000000")
-        h -= 28
+        h -= 30
 
     out = Image.alpha_composite(back_img, new_img)
     tt = Image.alpha_composite(out, Image.open("../static/img/logo.png").convert("RGBA"))
     # tt.show()
-    tt.save("/data/web/wwwroot/image/%s_bc.png" % num)
-    # tt.save("../result/%s.png" % num)
+    tt.save("/data/web/wwwroot/image/%s_%s.png" % (num, time_stmp))
 
 
 def send_email(file_list):
+    """发送邮件"""
     sender = 'liudiyuhan1@163.com'
     password = '851102ldyh*'
     receivers = ';'.join(["zhangqiannan@dangdang.com", '408621756@qq.com'])
@@ -164,14 +199,25 @@ def send_email(file_list):
     client.quit()
 
 img_dir = "/data/web/wwwroot/image/"
-def get_files():
+
+
+def get_files(time_stmp):
+    """获取文件"""
+    tmp = str(time_stmp)
     file_list = []
     for root, dirs, files in os.walk(img_dir):
-        if "_bc.png" in files:
-            file_list.append(files)
-    return
+        for file in files:
+            if tmp in file:
+                file_list.append(file)
+    return file_list
 
-def del_files():
+def del_files(time_stmp):
+    """删除大于1天的文件"""
     for root, dirs, files in os.walk(img_dir):
-        if "_bc.png" in files:
-            os.remove(os.path.join(dir, files))
+        if ".png" in files:
+            g = re.search(r'\d{10,}', files)
+            if len(g) == 1:
+                old_stmp = g(0)
+                diff = time_stmp - int(old_stmp)
+                if diff > 60*60*24:
+                    os.remove(os.path.join(dirs, files))

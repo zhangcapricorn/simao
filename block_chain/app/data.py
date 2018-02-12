@@ -100,7 +100,7 @@ def parser_jinse_lives(cmp_time):
                     content = i["content"]
                     d = []
                     if "】" in content:
-                        d = content.split("】")
+                        d = content[1:].split("】")
                     elif "。" in content:
                         d = content.split("。")
                     else:
