@@ -28,7 +28,7 @@ def filter_html_tag(str_tag):
     pattern = re.compile(r'<([^>]*)>')
 
     line = pattern.sub('', line)
-    line = re.sub('[\s+\.\!\/_,$%^*(+\"\')]+|[+——()?【】“”！，。？、~@#￥%……&*（）\"]+', "", line)
+    # line = re.sub('[\s+\.\!\/_,$%^*(+\"\')]+|[+——()?【】“”！，。？、~@#￥%……&*（）\"]+', "", line)
     return line
 
 

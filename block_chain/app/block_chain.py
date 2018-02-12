@@ -63,11 +63,6 @@ class Index(tornado.web.RequestHandler):
         file_list.append("list")
         del_files()
         self.write(json.dumps({'files': "_".join(file_list)}))
-        # try:
-        #     send_email(file_list)
-        #     self.write(json.dumps({'ok': "已经成功发送邮件，请查收"}))
-        # except Exception as e:
-        #     self.write(json.dumps({'error': "发送邮件失败，请联系开发者"}))
 
 
 class Title(tornado.web.RequestHandler):
