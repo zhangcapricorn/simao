@@ -63,7 +63,7 @@ class Index(tornado.web.RequestHandler):
         for i in range(0, len(result)):
             temp = join_word("%s. " % (i + 1) + result[i][1], 25)
             title_str = title_str + temp + "\n"
-            content = join_word("【" + result[i][1] + "】" + result[i][2], 25)
+            content = join_word("【" + result[i][1] + "】" + result[i][2], 24)
             draw_detail_3(content, "%s" % i, time_stmp)
         draw_detail_3(title_str, "list", time_stmp)
 

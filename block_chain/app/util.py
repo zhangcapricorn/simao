@@ -70,7 +70,7 @@ def filter_html_tag(str_tag):
 
 
 def filter_cn_blank(word):
-    return re.match("[[\d\s+\.\!\/_,$%^*(+\"\')]+|[+——()?【】“”！，。？、~@#￥%……&*（）\"：《》#“”a-z\u4e00-\u9fa5]", word)
+    return re.match("[[\d\s+\.\!\/_,$%^*(+\"\')]+|[+——()?【】“”！，。？、~@#￥%……&*（）\"：《》#“”a-z\u4e00-\u9fa5]", word, re.I)
 
 
 def join_word(content, length):
