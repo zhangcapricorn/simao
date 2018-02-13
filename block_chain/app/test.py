@@ -1,15 +1,25 @@
+# -*- coding: utf-8 -*-
 import time
+from PIL import Image, ImageFont, ImageDraw
 import textwrap
-from util import draw_detail
-from util import draw_list
+import datetime
+import re
+import os
+from util import draw_detail_3
+from util import join_word
 from util import select_from_db
-from util import cut_out_word
 
 if __name__ == "__main__":
-    sql = "select date, title, summary from block_chain where id in (%s)" % ('1, 2, 100, 1111, 2111')
-    result = [[i[0], i[1].strip(), i[2].strip()]for i in select_from_db(sql)]
-    time_stmp = int(time.time())
-    draw_list(result, time_stmp)
+    sql = "select date, title, summary from block_chain where id in (%s)" % ('7001, 7002, 1, 1000, 486')
+    result = select_from_db(sql)
+
+    content = join_word("【" + result[0][1] + "】" + result[0][2], 25)
+    draw_detail_3(content, "../result/1.png")
+
+    title_str = ""
     for i in range(0, len(result)):
-        draw_detail(result[i], i, time_stmp)
+        temp = join_word("%s. " % (i + 1) + result[i][1], 25)
+        title_str = title_str + temp + "\n"
+    draw_detail_3(title_str, "../result/list.png")
+
 
