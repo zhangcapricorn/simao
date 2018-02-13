@@ -290,7 +290,7 @@ def get_foot_regin():
     return f_r, h
 
 
-def draw_detail_3(content, file_name):
+def draw_detail_3(content, name, time_stmp):
     h_g, h_h = get_head_regin()
     c_g, c_h = get_content_regin(content)
     f_g, f_h = get_foot_regin()
@@ -298,5 +298,6 @@ def draw_detail_3(content, file_name):
     new_img.paste(h_g, (0, 0))
     new_img.paste(c_g, (40, h_h))
     new_img.paste(f_g, (0, h_h + c_h + 100))
-    new_img.show()
-    new_img.save(file_name)
+    # new_img.show()
+    path = "%s%s_%s.png" % (img_dir, name, time_stmp)
+    new_img.save(path)

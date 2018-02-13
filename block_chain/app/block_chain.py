@@ -10,10 +10,10 @@ import time
 from tornado.options import define, options
 
 from util import select_from_db
-from util import draw_detail
-from util import draw_list
+from util import draw_detail_3
 from util import del_files
 from util import get_files
+from util import join_word
 
 
 define("port", default="8006", help="run on the given port", type=int)
@@ -58,12 +58,15 @@ class Index(tornado.web.RequestHandler):
         sql = "select date, title, summary from block_chain where id in (%s)" % param
         result = select_from_db(sql)
         time_stmp = int(time.time())
-        draw_list(result, time_stmp)
-        file_list = []
+
+        title_str = ""
         for i in range(0, len(result)):
-            draw_detail(result[i], i, time_stmp)
-            file_list.append("%s_%s" % (i, time_stmp))
-        file_list.append("list_%s" % time_stmp)
+            temp = join_word("%s. " % (i + 1) + result[i][1], 25)
+            title_str = title_str + temp + "\n"
+            content = join_word("【" + result[i][1] + "】" + result[i][2], 25)
+            draw_detail_3(content, "%s" % i, time_stmp)
+        draw_detail_3(title_str, "list", time_stmp)
+
         del_files(time_stmp)
         self.write(json.dumps({'time_stmp': time_stmp}))
 
